@@ -19,6 +19,8 @@ public interface IOrderService {
 
     Orders updateOrder(Orders orders, RequestDTO items);
 
+    Orders updateOrderTrackingField(int orderNumber, String field);
+
     void removeOrder(int id);
 
 }

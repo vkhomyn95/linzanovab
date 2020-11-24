@@ -15,6 +15,8 @@ public class RequestDTO {
     private String lastName;
     private String firstName;
     private String patronymic;
+    private String email;
+    private String meestTrackingId;
     private String phone;
     private String customerComment;
     private Delivery delivery;

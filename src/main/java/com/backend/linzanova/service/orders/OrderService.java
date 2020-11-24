@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -173,6 +174,13 @@ public class OrderService implements IOrderService {
         System.out.println(list);
         System.out.println(orders);
         return ordersDao.save(orders);
+    }
+
+    @Override
+    public Orders updateOrderTrackingField(int orderNumber, String field) {
+        final Orders one = ordersDao.getOne(orderNumber);
+        one.setMeestTrackingId(field);
+        return ordersDao.save(one);
     }
 
     @Override

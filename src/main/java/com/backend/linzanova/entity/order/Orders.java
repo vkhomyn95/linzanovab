@@ -26,6 +26,7 @@ public class Orders {
     private int totalSumm;
     private String lastName;
     private String firstName;
+    private String email;
     private String patronymic;
     private String phone;
     private String customerComment;
