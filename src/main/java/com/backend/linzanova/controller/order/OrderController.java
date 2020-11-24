@@ -6,6 +6,7 @@ import com.backend.linzanova.entity.order.Orders;
 import com.backend.linzanova.entity.settlement.MethodProperties;
 import com.backend.linzanova.entity.settlement.Settlement;
 import com.backend.linzanova.entity.settlement.Tracking;
+import com.backend.linzanova.entity.settlement.UserTracking;
 import com.backend.linzanova.service.IUserService;
 import com.backend.linzanova.service.JwtService;
 import com.backend.linzanova.service.orders.IOrderService;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -111,4 +113,25 @@ public class OrderController {
         orderService.updateOrderTrackingField(orderNumber, trackId);
         return answer;
     }
+
+    @PostMapping("/tracking/realtime")
+    public String getOrderTrackingId(@RequestBody String trackingId) throws JsonProcessingException {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "https://api.tracktry.com/v1/trackings/realtime";
+
+        ObjectMapper mapper = new ObjectMapper();
+        UserTracking tracking = new UserTracking(trackingId, "meest", "UA", "ua");
+        System.out.println(tracking);
+        String requestJson = mapper.writeValueAsString(tracking);
+        System.out.println(requestJson);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Tracktry-Api-Key", "87897b1b-8240-4500-80da-c219900a49e5");
+
+        HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+        String answer = restTemplate.postForObject(url, entity, String.class);
+        return answer;
+    }
+
 }
