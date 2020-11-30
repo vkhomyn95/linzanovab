@@ -21,6 +21,8 @@ public class Drops {
     private int id;
     private String name;
     private int price;
+    private int avgPriceInUkraine;
+    private boolean availability;
     private int category;
     private String cProducer;
     private int cValue;

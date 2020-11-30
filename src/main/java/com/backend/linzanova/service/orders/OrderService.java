@@ -1,11 +1,13 @@
 package com.backend.linzanova.service.orders;
 
 import com.backend.linzanova.dao.drops.DropsDao;
+import com.backend.linzanova.dao.lens.LensDao;
 import com.backend.linzanova.dao.orders.OrdersDao;
 import com.backend.linzanova.dao.special.SpecialDao;
 import com.backend.linzanova.dto.*;
 import com.backend.linzanova.entity.drops.Drops;
 //import com.backend.linzanova.entity.order.Delivery;
+import com.backend.linzanova.entity.lens.Lens;
 import com.backend.linzanova.entity.order.Item;
 import com.backend.linzanova.entity.order.Orders;
 import com.backend.linzanova.entity.special.Special;
@@ -38,10 +40,14 @@ public class OrderService implements IOrderService {
     private DropsDao dropsDao;
 
     @Autowired
+    private LensDao lensDao;
+
+    @Autowired
     private SpecialDao specialDao;
 
     @Override
     public Orders insertOrder(Orders orders, RequestDTO items) {
+        final List<Lens> lensesList = new ArrayList<>();
         final List<Drops>  list = new ArrayList<>();
         final List<Special> specialList = new ArrayList<>();
         for (ItemDTO r : items.getItems()){
@@ -57,14 +63,20 @@ public class OrderService implements IOrderService {
                     specialList.add(special);
                 }
             }
+            if (r.getLenses() != null){
+                for (LensOrderDTO l : r.getLenses()) {
+                    final Lens lense = lensDao.getOne((l.getLenseId()));
+                    lensesList.add(lense);
+                }
+            }
         }
 
 
 
         List<Item> it = new ArrayList<Item>();
 
-        if (specialList != null && list != null) {
-            it.add(new Item(orders.getId(), list, specialList));
+        if (specialList != null && list != null && lensesList != null) {
+            it.add(new Item(orders.getId(), lensesList, list, specialList));
         }
         final User user = userService.getUser(items.getUser());
 
@@ -101,6 +113,10 @@ public class OrderService implements IOrderService {
         text.append("%0AТовар(вигідні пропозиції): ");
         for (int i = 0; i < specialList.size(); i++) {
             text.append("%0A"+ i + ") " + specialList.get(i).getName() + " ---------- " + specialList.get(i).getPrice() + " грн");
+        }
+        text.append("%0AТовар(лінзи): ");
+        for (int i = 0; i < lensesList.size(); i++) {
+            text.append("%0A"+ i + ") " + lensesList.get(i).getName() + " ---------- " + lensesList.get(i).getPrice() + " грн");
         }
         text.append("%0A----------------------------%0A");
         text.append("Інформація авторизованого користувача:");
@@ -148,6 +164,7 @@ public class OrderService implements IOrderService {
 
     @Override
     public Orders updateOrder(Orders orders, RequestDTO items) {
+        final List<Lens> lensesList = new ArrayList<>();
         final List<Drops>  list = new ArrayList<>();
         final List<Special> specialList = new ArrayList<>();
         for (ItemDTO r : items.getItems()){
@@ -159,9 +176,13 @@ public class OrderService implements IOrderService {
                 final Special special = specialDao.getOne(s.getOfferId());
                 specialList.add(special);
             }
+            for (LensOrderDTO l : r.getLenses()) {
+                final Lens lense = lensDao.getOne(l.getLenseId());
+                lensesList.add(lense);
+            }
         }
         List<Item> it = new ArrayList<Item>();
-        it.add(new Item(orders.getId(), list, specialList));
+        it.add(new Item(orders.getId(), lensesList, list, specialList));
 
         orders.setItems(it);
         orders.setCreatedAt(items.getCreatedAt());

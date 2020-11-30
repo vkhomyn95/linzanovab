@@ -44,6 +44,8 @@ public class User implements UserDetails {
     private String location;
     private String number;
     private String warehouse;
+    private int shoppingQuantity;
+
     private String role;
 
     @Override

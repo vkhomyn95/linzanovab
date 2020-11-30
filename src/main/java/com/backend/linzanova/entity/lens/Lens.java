@@ -29,6 +29,8 @@ public class Lens {
     @NotNull
     @Min(10)
     private int price;
+    private int avgPriceInUkraine;
+    private boolean availability;
     private int category;
     @Column
     private String lenseType;
@@ -49,6 +51,9 @@ public class Lens {
     private int lenseShelfLife;
     private boolean lenseSleep;
     private String alensaLink;
+
+    private float defaultBC;
+    private float defaultDiameter;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, optional = false)

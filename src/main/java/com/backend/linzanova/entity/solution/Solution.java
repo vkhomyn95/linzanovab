@@ -27,6 +27,8 @@ public class Solution {
     @Min(10)
     @NotNull
     private int price;
+    private int avgPriceInUkraine;
+    private boolean availability;
     private int category;
     @NotBlank
     private String solutionType;
