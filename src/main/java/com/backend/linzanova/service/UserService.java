@@ -1,6 +1,7 @@
 package com.backend.linzanova.service;
 
 import com.backend.linzanova.dao.IUserDao;
+import com.backend.linzanova.dto.UserOrderDTO;
 import com.backend.linzanova.dto.UserPageDTO;
 import com.backend.linzanova.entity.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,4 +75,5 @@ public class UserService implements UserDetailsService, IUserService {
     public User findByEmail(String email) {
         return userDao.findByEmail(email);
     }
+
 }

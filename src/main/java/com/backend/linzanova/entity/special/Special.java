@@ -34,6 +34,12 @@ public class Special {
     private int price;
     private String alensaLink;
 
+    private boolean hasAxis;
+    private boolean hasCylinder;
+    private boolean hasDefaultBC;
+    private float defaultBC;
+    private float defaultDiameter;
+
     private boolean activeStatus;
 
     @JsonIgnore

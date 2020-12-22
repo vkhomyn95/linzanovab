@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class LensOrderDTO {
     private int lenseId;
+    private String properties;
 }

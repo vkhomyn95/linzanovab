@@ -39,12 +39,16 @@ public class Orders {
     @JoinColumn(name = "orders_id")
     private List<Item> items;
 
+    private String properties;
+
 
     private String meestTrackingId;
     private String dpdTrackingId;
     private String novaPoshtaTTN;
     private String alensaId;
     private boolean receivedInMesstPoland;
+
+    private boolean delivered;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, optional = false)

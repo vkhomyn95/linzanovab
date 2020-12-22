@@ -47,6 +47,7 @@ public class SolutionService implements ISolutionService {
     @Override
     public Solution updateSolution(Solution solution, int userId) {
         final User user = userDao.getOne(userId);
+        solution.setCategory(2);
         solution.setUser(user);
         return solutionDao.save(solution);
     }

@@ -44,6 +44,7 @@ public class Lens {
     private String lenseCorrection;
     @Column
     private String lenseMaterial;
+    @Column(columnDefinition = "TEXT")
     private String description;
     private int lenseWater;
     private int sDate;
@@ -52,6 +53,9 @@ public class Lens {
     private boolean lenseSleep;
     private String alensaLink;
 
+    private boolean hasAxis;
+    private boolean hasCylinder;
+    private boolean hasDefaultBC;
     private float defaultBC;
     private float defaultDiameter;
 

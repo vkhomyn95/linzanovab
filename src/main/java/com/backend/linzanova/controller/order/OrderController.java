@@ -38,6 +38,9 @@ public class OrderController {
     @PostMapping
     public Orders saveOrder(@RequestBody RequestDTO requestDTO) {
         final Orders orders = new Orders();
+        if (requestDTO.getUser() == 0){
+            requestDTO.setUser(2);
+        }
         return orderService.insertOrder(orders, requestDTO);
     }
 

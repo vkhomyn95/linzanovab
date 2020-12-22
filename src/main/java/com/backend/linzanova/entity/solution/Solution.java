@@ -38,6 +38,7 @@ public class Solution {
     private String solutionBrand;
     @NotNull
     private int solutionValue;
+    @Column(columnDefinition = "TEXT", length = 3000)
     private String description;
     private int sDate;
     private int sTdt;

@@ -64,22 +64,71 @@ public class UserController {
     }
 
     @GetMapping(value = "/auth")
-    public UserOrderDTO getAuthUser(@RequestHeader(value = "Authorization", required = false) String auth) {
+    public AuthIdUserOrderDTO getAuthUser(@RequestHeader(value = "Authorization", required = false) String auth) {
         if (auth != null) {
             String jwtToken = auth.substring(7);
             String user = jwtService.extractUsername(jwtToken);
             User byEmail = userService.findByEmail(user);
-            return new UserOrderDTO(byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber());
+            return new AuthIdUserOrderDTO(byEmail.getId(), byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber());
+        }else {
+            return null;
+        }
+    }
+
+    @GetMapping(value = "/stats")
+    public UserCabinetStatsDTO getAuthUserStats(@RequestHeader(value = "Authorization", required = false) String auth) {
+        if (auth != null) {
+            String jwtToken = auth.substring(7);
+            String user = jwtService.extractUsername(jwtToken);
+            User byEmail = userService.findByEmail(user);
+            return new UserCabinetStatsDTO(byEmail.getShoppingQuantity(), byEmail.getDeliveredShopsQuantity(), byEmail.getBonusesQuantity());
         }else {
             return null;
         }
     }
 
     @PostMapping(value = "/{id}")
-    public User updateUser(@PathVariable int id, @RequestBody User user) {
-        user.setId(id);
-        user.setRole("ROLE_USER");
-        return userService.updateUser(user);
+    public User updateUser(@RequestHeader(value = "Authorization") String auth,
+                           @PathVariable int id,
+                           @RequestBody User user) {
+        String jwtToken = auth.substring(7);
+        String jwtUser = jwtService.extractUsername(jwtToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUser);
+        System.out.println(userDetails);
+        if (userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
+
+            user.setId(id);
+            user.setRole("ROLE_USER");
+            return userService.updateUser(user);
+        }else{
+            throw new RuntimeException("No rights");
+        }
+    }
+
+    @PostMapping(value = "/update")
+    public UserOrderDTO updateCurrentUser(@RequestHeader(value = "Authorization") String auth,
+                                          @RequestBody UserOrderDTO user) {
+        if (auth != null) {
+            String jwtToken = auth.substring(7);
+            String jwtUser = jwtService.extractUsername(jwtToken);
+            User byEmail = userService.findByEmail(jwtUser);
+            if (byEmail.getRole().equals("ROLE_USER")) {
+                byEmail.setFirstName(user.getFirstName());
+                byEmail.setLastName(user.getLastName());
+                byEmail.setEmail(user.getEmail());
+                byEmail.setNumber(user.getNumber());
+                byEmail.setPhone(user.getPhone());
+                byEmail.setWarehouse(user.getWarehouse());
+                byEmail.setLocation(user.getLocation());
+                userService.updateUser(byEmail);
+                return new UserOrderDTO(byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber());
+            }else {
+                throw  new RuntimeException("Access denied");
+            }
+        }else {
+            throw new RuntimeException("Please, auth first");
+        }
     }
 
     @PostMapping(value = "/register")

@@ -42,6 +42,7 @@ public class SpecialService implements ISpecialService {
     @Override
     public Special updateSpecial(Special special, int userId) {
         final User user = userDao.getOne(userId);
+        special.setCategory(3);
         special.setUser(user);
         return specialDao.save(special);
     }

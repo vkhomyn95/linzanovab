@@ -4,11 +4,13 @@ import com.backend.linzanova.entity.order.Delivery;
 import com.backend.linzanova.entity.order.Item;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @AllArgsConstructor
 @Getter
+@Setter
 public class RequestDTO {
     private String createdAt;
     private int totalSumm;

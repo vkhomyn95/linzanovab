@@ -27,6 +27,7 @@ public class SolutionController {
     @ResponseStatus(HttpStatus.CREATED)
     public Solution saveSolution(@RequestBody @Valid Solution solution, @PathVariable int userId) {
         solution.setCategory(2);
+        solution.setAvailability(true);
         return solutionService.insertSolution(solution, userId);
     }
 

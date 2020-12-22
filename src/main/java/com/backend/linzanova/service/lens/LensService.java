@@ -24,6 +24,11 @@ public class LensService implements ILensService {
     public LensDto insertLens(Lens lens, int userId) {
         final User user = userDao.getOne(userId);
         lens.setUser(user);
+        if (lens.getDefaultBC() == 0){
+            lens.setHasDefaultBC(false);
+        }else {
+            lens.setHasDefaultBC(true);
+        }
         lens = lensDao.save(lens);
         return new LensDto(lens.getId(), lens.getName(), lens.getPrice(), user.getFirstName());
     }
@@ -42,6 +47,7 @@ public class LensService implements ILensService {
     @Override
     public Lens updateLens(Lens lens, int userId) {
         final User user = userDao.getOne(userId);
+        lens.setCategory(1);
         lens.setUser(user);
         return lensDao.save(lens);
     }

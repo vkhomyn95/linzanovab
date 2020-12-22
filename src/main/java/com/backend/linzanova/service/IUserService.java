@@ -1,5 +1,6 @@
 package com.backend.linzanova.service;
 
+import com.backend.linzanova.dto.UserOrderDTO;
 import com.backend.linzanova.dto.UserPageDTO;
 import com.backend.linzanova.entity.user.User;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,5 @@ public interface IUserService {
     UserPageDTO getAllUsersByName(Pageable pageable, String name);
 
     User findByEmail(String email);
+
 }

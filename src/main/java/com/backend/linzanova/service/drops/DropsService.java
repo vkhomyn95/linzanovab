@@ -29,6 +29,7 @@ public class DropsService implements IDropsService{
     @Override
     public Drops insertDrops(Drops drops, int userId) {
         final User user = userDao.getOne(userId);
+        drops.setCategory(0);
         drops.setUser(user);
         return dropsDao.save(drops);
     }

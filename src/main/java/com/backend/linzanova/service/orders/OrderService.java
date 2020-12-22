@@ -45,8 +45,12 @@ public class OrderService implements IOrderService {
     @Autowired
     private SpecialDao specialDao;
 
+    @Autowired DeliveryService deliveryService;
+
     @Override
     public Orders insertOrder(Orders orders, RequestDTO items) {
+        System.out.println(items.getDelivery());
+        StringBuilder allProperties = new StringBuilder();
         final List<Lens> lensesList = new ArrayList<>();
         final List<Drops>  list = new ArrayList<>();
         final List<Special> specialList = new ArrayList<>();
@@ -66,6 +70,8 @@ public class OrderService implements IOrderService {
             if (r.getLenses() != null){
                 for (LensOrderDTO l : r.getLenses()) {
                     final Lens lense = lensDao.getOne((l.getLenseId()));
+                    allProperties.append(lense.getName() + " - " + l.getProperties());
+                    System.out.println(allProperties);
                     lensesList.add(lense);
                 }
             }
@@ -79,7 +85,7 @@ public class OrderService implements IOrderService {
             it.add(new Item(orders.getId(), lensesList, list, specialList));
         }
         final User user = userService.getUser(items.getUser());
-
+        deliveryService.insertDelivery(items.getDelivery());
         orders.setItems(it);
         orders.setCreatedAt(items.getCreatedAt());
         orders.setTotalSumm(items.getTotalSumm());
@@ -87,7 +93,9 @@ public class OrderService implements IOrderService {
         orders.setFirstName(items.getFirstName());
         orders.setPatronymic(items.getPatronymic());
         orders.setPhone(items.getPhone());
+        orders.setDelivery(items.getDelivery());
         orders.setCustomerComment(items.getCustomerComment());
+        orders.setProperties(allProperties.toString());
         orders.setUser(user);
 
         String urlString = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
@@ -104,6 +112,11 @@ public class OrderService implements IOrderService {
         text.append("%0AІмя клієнта: " + orders.getFirstName());
         text.append("%0AПрізвище клієнта: " + orders.getLastName());
         text.append("%0AТелефон клієнта: " + orders.getPhone());
+        if (items.getDelivery() != null){
+            text.append("%0A----------------------------%0A");
+            text.append("Доставка: %0A" + orders.getDelivery().getCityName() + "%0A" + orders.getDelivery().getWarehouseNumber());
+            text.append("%0A----------------------------%0A");
+        }
         text.append("%0AКоментар клієнта: " + orders.getCustomerComment());
         text.append("%0AТовар(розчини): ");
 
@@ -126,6 +139,8 @@ public class OrderService implements IOrderService {
         text.append("%0AАдреса доставки: " + user.getLocation());
         text.append("%0AВідділення: №" + user.getNumber());
         text.append("%0AАдреса відділення: " + user.getWarehouse());
+        text.append("%0A----------------------------%0A");
+        text.append(allProperties.toString());
 
 
 

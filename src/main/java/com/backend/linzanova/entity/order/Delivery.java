@@ -1,5 +1,6 @@
 package com.backend.linzanova.entity.order;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +20,18 @@ import java.util.List;
 public class Delivery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private int id;
-    private String street;
-    private String city;
+
+    private String deliveryType;
+    private String paymentType;
+
+    private String cityName;
+    private String warehouseNumber;
+    private String description;
+    private int postIndex;
+
+//    @JsonIgnore
+//    @OneToOne(fetch = FetchType.EAGER, optional = false)
+//    private Orders order;
 }
