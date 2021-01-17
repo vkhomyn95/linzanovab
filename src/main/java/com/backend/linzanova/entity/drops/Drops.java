@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,18 +20,21 @@ public class Drops {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(nullable = false, unique = true)
+    @NotBlank
     private String name;
+    private int category;
     private int price;
     private int avgPriceInUkraine;
-    private boolean availability;
-    private int category;
+
     private String cProducer;
     private int cValue;
+    @Lob
     private String description;
     private int sdate;
     private int stdt;
 
-    private String alensaLink;
+    private boolean availability;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

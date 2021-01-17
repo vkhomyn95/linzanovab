@@ -94,12 +94,10 @@ public class UserController {
         String jwtToken = auth.substring(7);
         String jwtUser = jwtService.extractUsername(jwtToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUser);
-        System.out.println(userDetails);
         if (userDetails != null && userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
 
             user.setId(id);
-            user.setRole("ROLE_USER");
             return userService.updateUser(user);
         }else{
             throw new RuntimeException("No rights");

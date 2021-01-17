@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,19 +21,18 @@ public class Special {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    private int category;
-
+    @Column(nullable = false, unique = true)
+    @NotBlank
     private String name;
+    private int category;
+    private int price;
+    private int avgPriceInUkraine;
 
     private int firstItemQuanity;
     private int secondItemQuanity;
 
     private String firstItemName;
     private String secondItemName;
-
-    private int price;
-    private String alensaLink;
 
     private boolean hasAxis;
     private boolean hasCylinder;

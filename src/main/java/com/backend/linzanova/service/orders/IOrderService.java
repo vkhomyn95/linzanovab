@@ -1,10 +1,10 @@
 package com.backend.linzanova.service.orders;
 
+import com.backend.linzanova.dto.OrderItemsDTO;
 import com.backend.linzanova.dto.OrderPageDTO;
 import com.backend.linzanova.dto.RequestDTO;
 import com.backend.linzanova.entity.order.Orders;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 
 
 public interface IOrderService {
@@ -13,13 +13,15 @@ public interface IOrderService {
 
     OrderPageDTO getAllOrders(Pageable pageable);
 
-    Orders getOneOrderById(int id);
+    OrderItemsDTO getOneOrderById(int id);
 
     OrderPageDTO getAllOrdersByUserEmail(Pageable pageable, String email);
 
-    Orders updateOrder(Orders orders, RequestDTO items);
+    Orders updateOrder(int id, OrderItemsDTO items);
 
     Orders updateOrderTrackingField(int orderNumber, String field);
+
+    Long totalCount();
 
     void removeOrder(int id);
 

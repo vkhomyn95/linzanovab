@@ -10,6 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+import static com.backend.linzanova.dao.lens.LensSpecification.byColumnNameAndValue;
+
 
 @Service
 public class LensService implements ILensService {
@@ -21,8 +25,8 @@ public class LensService implements ILensService {
     private IUserDao userDao;
 
     @Override
-    public LensDto insertLens(Lens lens, int userId) {
-        final User user = userDao.getOne(userId);
+    public LensDto insertLens(Lens lens, String username) {
+        final User user = userDao.findByEmail(username);
         lens.setUser(user);
         if (lens.getDefaultBC() == 0){
             lens.setHasDefaultBC(false);
@@ -45,8 +49,8 @@ public class LensService implements ILensService {
     }
 
     @Override
-    public Lens updateLens(Lens lens, int userId) {
-        final User user = userDao.getOne(userId);
+    public Lens updateLens(Lens lens, String username) {
+        final User user = userDao.findByEmail(username);
         lens.setCategory(1);
         lens.setUser(user);
         return lensDao.save(lens);
@@ -66,5 +70,11 @@ public class LensService implements ILensService {
     public LensPageDTO getLensesByName(Pageable pageable, String name) {
         final Page<Lens> byNameContains = lensDao.findByNameContains(pageable, name);
         return new LensPageDTO(byNameContains.getContent(), byNameContains.getTotalElements(), byNameContains.getSize(), byNameContains.isEmpty(), byNameContains.getTotalPages());
+    }
+
+    @Override
+    public LensPageDTO getLensFilter(Pageable pageable, String colName, String nameValue) {
+        final Page<Lens> byFIlter = lensDao.findAll(byColumnNameAndValue(colName, nameValue), pageable);
+        return new LensPageDTO(byFIlter.getContent(), byFIlter.getTotalElements(), byFIlter.getSize(), byFIlter.isEmpty(), byFIlter.getTotalPages());
     }
 }

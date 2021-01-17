@@ -22,14 +22,15 @@ public class Solution {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(nullable = false, unique = true)
     @NotBlank
     private String name;
+    private int category;
     @Min(10)
     @NotNull
     private int price;
     private int avgPriceInUkraine;
-    private boolean availability;
-    private int category;
+
     @NotBlank
     private String solutionType;
     @NotBlank
@@ -40,10 +41,12 @@ public class Solution {
     private int solutionValue;
     @Column(columnDefinition = "TEXT", length = 3000)
     private String description;
+
     private int sDate;
     private int sTdt;
+
     private boolean boolHyaluronate;
-    private String alensaLink;
+    private boolean availability;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, optional = false)

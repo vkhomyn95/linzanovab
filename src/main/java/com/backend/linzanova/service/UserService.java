@@ -52,12 +52,8 @@ public class UserService implements UserDetailsService, IUserService {
 
     @Override
     public User updateUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userDao.save(user);
-    }
-
-    @Override
-    public void removeUser(int id) {
-        userDao.deleteById(id);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.backend.linzanova.dao.IUserDao;
 import com.backend.linzanova.dao.drops.DropsDao;
 import com.backend.linzanova.dto.DropPageDTO;
 import com.backend.linzanova.entity.drops.Drops;
+import com.backend.linzanova.entity.solution.Solution;
 import com.backend.linzanova.entity.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import static com.backend.linzanova.dao.drops.DropsSpecification.byColumnNameAndValue;
+
 
 @Service
 public class DropsService implements IDropsService{
@@ -27,8 +29,8 @@ public class DropsService implements IDropsService{
     }
 
     @Override
-    public Drops insertDrops(Drops drops, int userId) {
-        final User user = userDao.getOne(userId);
+    public Drops insertDrops(Drops drops, String username) {
+        final User user = userDao.findByEmail(username);
         drops.setCategory(0);
         drops.setUser(user);
         return dropsDao.save(drops);
@@ -46,8 +48,8 @@ public class DropsService implements IDropsService{
     }
 
     @Override
-    public Drops updateDrops(Drops drops, int userId) {
-        final User user = userDao.getOne(userId);
+    public Drops updateDrops(Drops drops, String username) {
+        final User user = userDao.findByEmail(username);
         drops.setUser(user);
         return dropsDao.save(drops);
     }
@@ -66,5 +68,11 @@ public class DropsService implements IDropsService{
     public DropPageDTO getDropsByName(Pageable pageRequest, String name) {
         final Page<Drops> byNameContains = dropsDao.findByNameContains(pageRequest, name);
         return new DropPageDTO(byNameContains.getContent(), byNameContains.getTotalElements(), byNameContains.getSize(), byNameContains.isEmpty(), byNameContains.getTotalPages());
+    }
+
+    @Override
+    public DropPageDTO getDropsFilter(Pageable pageable, String colName, String nameValue) {
+        final Page<Drops> byFIlter = dropsDao.findAll(byColumnNameAndValue(colName, nameValue), pageable);
+        return new DropPageDTO(byFIlter.getContent(), byFIlter.getTotalElements(), byFIlter.getSize(), byFIlter.isEmpty(), byFIlter.getTotalPages());
     }
 }

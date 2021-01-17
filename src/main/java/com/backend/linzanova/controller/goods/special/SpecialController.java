@@ -2,11 +2,15 @@ package com.backend.linzanova.controller.goods.special;
 
 import com.backend.linzanova.dto.SpecialPageDTO;
 import com.backend.linzanova.entity.special.Special;
+import com.backend.linzanova.service.JwtService;
 import com.backend.linzanova.service.special.ISpecialService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -17,6 +21,10 @@ import javax.validation.Valid;
 public class SpecialController {
 
     private ISpecialService specialService;
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @GetMapping("/count")
     public Long totalCount() {
@@ -31,7 +39,7 @@ public class SpecialController {
     }
 
     @GetMapping("/{offerId}")
-    public Special getDrop(@PathVariable int offerId) {
+    public Special getOffer(@PathVariable int offerId) {
         return specialService.getSpecialById(offerId);
     }
 
@@ -43,17 +51,38 @@ public class SpecialController {
         return specialService.getSpecialByName(pageRequest, name);
     }
 
-    @PostMapping(value = "/user/{userId}")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Special saveSpecialOffer(@RequestBody @Valid Special offer, @PathVariable int userId) {
-        offer.setCategory(3);
-        return specialService.insertSpecial(offer, userId);
+    public Special saveSpecialOffer(@RequestHeader(value = "Authorization") String auth,
+                                    @RequestBody @Valid Special offer) {
+        String jwtToken = auth.substring(7);
+        String jwtUser = jwtService.extractUsername(jwtToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUser);
+        if (userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
+
+            offer.setCategory(3);
+            return specialService.insertSpecial(offer, userDetails.getUsername());
+        }else{
+            throw new RuntimeException("No rights");
+        }
     }
 
-    @PostMapping(value = "/{specialOfferId}/user/{userId}")
-    public Special updateDrop(@RequestBody Special offer, @PathVariable int specialOfferId, @PathVariable int userId) {
-        offer.setId(specialOfferId);
-        return specialService.updateSpecial(offer, userId);
+    @PostMapping(value = "/{specialOfferId}")
+    public Special updateSpecialOffer(@RequestHeader(value = "Authorization") String auth,
+                                      @RequestBody Special offer,
+                                      @PathVariable int specialOfferId) {
+        String jwtToken = auth.substring(7);
+        String jwtUser = jwtService.extractUsername(jwtToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUser);
+        if (userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
+
+            offer.setId(specialOfferId);
+            return specialService.updateSpecial(offer, userDetails.getUsername());
+        }else{
+            throw new RuntimeException("No rights");
+        }
     }
 
 }

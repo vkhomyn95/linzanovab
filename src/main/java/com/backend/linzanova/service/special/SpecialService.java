@@ -21,8 +21,8 @@ public class SpecialService implements ISpecialService {
     private IUserDao userDao;
 
     @Override
-    public Special insertSpecial(Special special, int userId) {
-        final User user = userDao.getOne(userId);
+    public Special insertSpecial(Special special, String username) {
+        final User user = userDao.findByEmail(username);
         special.setUser(user);
         return specialDao.save(special);
     }
@@ -40,8 +40,8 @@ public class SpecialService implements ISpecialService {
     }
 
     @Override
-    public Special updateSpecial(Special special, int userId) {
-        final User user = userDao.getOne(userId);
+    public Special updateSpecial(Special special, String username) {
+        final User user = userDao.findByEmail(username);
         special.setCategory(3);
         special.setUser(user);
         return specialDao.save(special);

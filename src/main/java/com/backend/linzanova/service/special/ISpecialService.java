@@ -7,13 +7,13 @@ import org.springframework.data.domain.Pageable;
 
 public interface ISpecialService {
 
-    Special insertSpecial(Special special, int userId);
+    Special insertSpecial(Special special, String username);
 
     SpecialPageDTO getAllSpecials(PageRequest pageRequest);
 
     Special getSpecialById(int id);
 
-    Special updateSpecial(Special special, int userId);
+    Special updateSpecial(Special special, String username);
 
     void removeSpecial(int id);
 

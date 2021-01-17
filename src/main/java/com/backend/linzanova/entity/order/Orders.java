@@ -21,9 +21,12 @@ public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    private int totalSumm;
+    private int priceToPayAfterDelivery;
+    private int priceToPayNow;
 
     private String createdAt;
-    private int totalSumm;
+
     private String lastName;
     private String firstName;
     private String email;
@@ -39,16 +42,15 @@ public class Orders {
     @JoinColumn(name = "orders_id")
     private List<Item> items;
 
+    @Lob
     private String properties;
 
 
     private String meestTrackingId;
-    private String dpdTrackingId;
     private String novaPoshtaTTN;
-    private String alensaId;
-    private boolean receivedInMesstPoland;
 
     private boolean delivered;
+    private boolean canceled;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, optional = false)

@@ -1,6 +1,5 @@
 package com.backend.linzanova.dto;
 
-import com.backend.linzanova.entity.order.Orders;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,7 +9,7 @@ import java.util.List;
 @Getter
 public class OrderPageDTO {
 
-    private List<Orders> orders;
+    private List<OrderItemsDTO> orders;
     private long totalElements;
     private int size;
     private boolean empty;

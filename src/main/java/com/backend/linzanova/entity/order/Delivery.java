@@ -31,7 +31,4 @@ public class Delivery {
     private String description;
     private int postIndex;
 
-//    @JsonIgnore
-//    @OneToOne(fetch = FetchType.EAGER, optional = false)
-//    private Orders order;
 }

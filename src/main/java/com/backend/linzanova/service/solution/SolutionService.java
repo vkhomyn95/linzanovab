@@ -3,6 +3,7 @@ package com.backend.linzanova.service.solution;
 import com.backend.linzanova.dao.IUserDao;
 import com.backend.linzanova.dao.solution.SolutionDao;
 import com.backend.linzanova.dto.SolutionPageDTO;
+import com.backend.linzanova.entity.lens.Lens;
 import com.backend.linzanova.entity.solution.Solution;
 import com.backend.linzanova.entity.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import static com.backend.linzanova.dao.solution.SolutionSpecification.byColumnNameAndValue;
 
 
 @Service
@@ -27,8 +29,8 @@ public class SolutionService implements ISolutionService {
     }
 
     @Override
-    public Solution insertSolution(Solution solution, int userId) {
-        final User user = userDao.getOne(userId);
+    public Solution insertSolution(Solution solution, String username) {
+        final User user = userDao.findByEmail(username);
         solution.setUser(user);
         return solutionDao.save(solution);
     }
@@ -45,9 +47,8 @@ public class SolutionService implements ISolutionService {
     }
 
     @Override
-    public Solution updateSolution(Solution solution, int userId) {
-        final User user = userDao.getOne(userId);
-        solution.setCategory(2);
+    public Solution updateSolution(Solution solution, String username) {
+        final User user = userDao.findByEmail(username);
         solution.setUser(user);
         return solutionDao.save(solution);
     }
@@ -66,5 +67,17 @@ public class SolutionService implements ISolutionService {
     public SolutionPageDTO getSolutionsByName(Pageable pageable, String name) {
         final Page<Solution> byNameContains = solutionDao.findByNameContains(pageable, name);
         return new SolutionPageDTO(byNameContains.getContent(), byNameContains.getTotalElements(), byNameContains.getSize(), byNameContains.isEmpty(), byNameContains.getTotalPages());
+    }
+
+    @Override
+    public SolutionPageDTO getSolutionFilter(Pageable pageable, String colName, String nameValue) {
+        final Page<Solution> byFIlter = solutionDao.findAll(byColumnNameAndValue(colName, nameValue), pageable);
+        return new SolutionPageDTO(byFIlter.getContent(), byFIlter.getTotalElements(), byFIlter.getSize(), byFIlter.isEmpty(), byFIlter.getTotalPages());
+    }
+
+    @Override
+    public SolutionPageDTO getSolutionsBoolHyaluronate(Pageable pageable) {
+        final Page<Solution> byHyaluronate = solutionDao.findSolutionsByBoolHyaluronateIsTrue(pageable);
+        return new SolutionPageDTO(byHyaluronate.getContent(), byHyaluronate.getTotalElements(), byHyaluronate.getSize(), byHyaluronate.isEmpty(), byHyaluronate.getTotalPages());
     }
 }

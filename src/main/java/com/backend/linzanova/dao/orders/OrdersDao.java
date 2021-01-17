@@ -7,8 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface OrdersDao extends JpaRepository<Orders, Integer> {
+    @Query("select count(o) from Orders o")
+    Long CountOrders();
 
-    @Query("select o from Orders o where o.user.email = :email")
+    @Query("select o from Orders o where o.user.email = :email order by o.id desc")
     Page<Orders> findAllByUserEmail(Pageable pageable, String email);
 
+    @Query("select o from Orders o order by o.id desc")
+    Page<Orders> findAll(Pageable pageable);
 }

@@ -70,9 +70,13 @@ public class OrderService implements IOrderService {
             if (r.getLenses() != null){
                 for (LensOrderDTO l : r.getLenses()) {
                     final Lens lense = lensDao.getOne((l.getLenseId()));
-                    allProperties.append(lense.getName() + " - " + l.getProperties());
-                    System.out.println(allProperties);
+                    System.out.println(lense);
+
                     lensesList.add(lense);
+                    allProperties.append(lense.getName() + " - " + l.getProperties());
+
+                    System.out.println(allProperties);
+
                 }
             }
         }
@@ -97,6 +101,7 @@ public class OrderService implements IOrderService {
         orders.setCustomerComment(items.getCustomerComment());
         orders.setProperties(allProperties.toString());
         orders.setUser(user);
+        user.setShoppingQuantity(user.getShoppingQuantity() + 1);
 
         String urlString = "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s";
 
@@ -140,7 +145,7 @@ public class OrderService implements IOrderService {
         text.append("%0AВідділення: №" + user.getNumber());
         text.append("%0AАдреса відділення: " + user.getWarehouse());
         text.append("%0A----------------------------%0A");
-        text.append(allProperties.toString());
+        text.append(allProperties.toString().replace("\n", "%0A"));
 
 
 
@@ -161,55 +166,68 @@ public class OrderService implements IOrderService {
     @Override
     public OrderPageDTO getAllOrders(Pageable pageable) {
         final Page<Orders> all = ordersDao.findAll(pageable);
-        System.out.println(all.getContent());
-        return new OrderPageDTO(all.getContent(), all.getTotalElements(), all.getSize(), all.isEmpty(), all.getTotalPages());
+        final List<Orders> content = all.getContent();
+        final List<OrderItemsDTO> orders = new ArrayList<>();
+
+        content.stream().map(e -> {
+            OrderItemsDTO item = new OrderItemsDTO(e.getId(), e.getTotalSumm(), e.getPriceToPayAfterDelivery(), e.getPriceToPayNow(),
+                    e.getCreatedAt(), e.getLastName(), e.getFirstName(), e.getEmail(), e.getPatronymic(), e.getPhone(),
+                    e.getCustomerComment(), e.getDelivery(), e.getProperties(), e.getMeestTrackingId(), e.getNovaPoshtaTTN(),
+                    e.isDelivered(), e.isCanceled(), e.getUser().getEmail(), e.getUser().getId());
+            return orders.add(item);
+        }).collect(Collectors.toList());
+
+        System.out.println(content);
+        System.out.println();
+        return new OrderPageDTO(orders, all.getTotalElements(), all.getSize(), all.isEmpty(), all.getTotalPages());
     }
 
     @Override
-    public Orders getOneOrderById(int id) {
-        return ordersDao.getOne(id);
+    public OrderItemsDTO getOneOrderById(int id) {
+        Orders one = ordersDao.getOne(id);
+        System.out.println(one.getProperties());
+        return new OrderItemsDTO(one.getId(), one.getTotalSumm(), one.getPriceToPayAfterDelivery(), one.getPriceToPayNow(),
+                one.getCreatedAt(), one.getLastName(), one.getFirstName(), one.getEmail(), one.getPatronymic(), one.getPhone(),
+                one.getCustomerComment(), one.getDelivery(), one.getProperties(), one.getMeestTrackingId(), one.getNovaPoshtaTTN(),
+                one.isDelivered(), one.isCanceled(), one.getUser().getEmail(), one.getUser().getId());
     }
 
     @Override
     public OrderPageDTO getAllOrdersByUserEmail(Pageable pageable, String email) {
         final Page<Orders> all = ordersDao.findAllByUserEmail(pageable, email);
-        System.out.println(all);
-        return new OrderPageDTO(all.getContent(), all.getTotalElements(), all.getSize(), all.isEmpty(), all.getTotalPages());
+        final List<Orders> content = all.getContent();
+        final List<OrderItemsDTO> orders = new ArrayList<>();
+        content.stream().map(e -> {
+            OrderItemsDTO item = new OrderItemsDTO(e.getId(), e.getTotalSumm(), e.getPriceToPayAfterDelivery(), e.getPriceToPayNow(),
+                    e.getCreatedAt(), e.getLastName(), e.getFirstName(), e.getEmail(), e.getPatronymic(), e.getPhone(),
+                    e.getCustomerComment(), e.getDelivery(), e.getProperties(), e.getMeestTrackingId(), e.getNovaPoshtaTTN(),
+                    e.isDelivered(), e.isCanceled(), e.getUser().getEmail(), e.getUser().getId());
+            return orders.add(item);
+        }).collect(Collectors.toList());
+
+        System.out.println(content);
+        System.out.println();
+        return new OrderPageDTO(orders, all.getTotalElements(), all.getSize(), all.isEmpty(), all.getTotalPages());
     }
 
     @Override
-    public Orders updateOrder(Orders orders, RequestDTO items) {
-        final List<Lens> lensesList = new ArrayList<>();
-        final List<Drops>  list = new ArrayList<>();
-        final List<Special> specialList = new ArrayList<>();
-        for (ItemDTO r : items.getItems()){
-            for (DropDTO i : r.getDrops()) {
-                final Drops drops = dropsDao.getOne(i.getDropId());
-                list.add(drops);
-            }
-            for (SpecialDTO s : r.getOffers()) {
-                final Special special = specialDao.getOne(s.getOfferId());
-                specialList.add(special);
-            }
-            for (LensOrderDTO l : r.getLenses()) {
-                final Lens lense = lensDao.getOne(l.getLenseId());
-                lensesList.add(lense);
-            }
-        }
-        List<Item> it = new ArrayList<Item>();
-        it.add(new Item(orders.getId(), lensesList, list, specialList));
+    public Orders updateOrder(int id, OrderItemsDTO items) {
+        System.out.println(items);
+        final Orders order = ordersDao.getOne(id);
+        order.setId(id);
+        order.setCanceled(items.isCanceled());
+        order.setPatronymic(items.getPatronymic());
+        order.setMeestTrackingId(items.getMeestTrackingId());
+        order.setNovaPoshtaTTN(items.getNovaPoshtaTTN());
+        order.setPriceToPayAfterDelivery(items.getPriceToPayAfterDelivery());
+        order.setPriceToPayNow(items.getPriceToPayNow());
+        order.setTotalSumm(items.getTotalSumm());
+        return ordersDao.save(order);
+    }
 
-        orders.setItems(it);
-        orders.setCreatedAt(items.getCreatedAt());
-        orders.setTotalSumm(items.getTotalSumm());
-        orders.setLastName(items.getLastName());
-        orders.setFirstName(items.getFirstName());
-        orders.setPatronymic(items.getPatronymic());
-        orders.setPhone(items.getPhone());
-        orders.setCustomerComment(items.getCustomerComment());
-        System.out.println(list);
-        System.out.println(orders);
-        return ordersDao.save(orders);
+    @Override
+    public Long totalCount() {
+        return ordersDao.CountOrders();
     }
 
     @Override

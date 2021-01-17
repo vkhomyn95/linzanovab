@@ -15,8 +15,6 @@ public interface IUserService {
 
     User updateUser(User user);
 
-    void removeUser(int id);
-
     Long totalCount();
 
     UserPageDTO getAllUsersByName(Pageable pageable, String name);

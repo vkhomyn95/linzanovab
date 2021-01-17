@@ -22,16 +22,16 @@ public class Lens {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
+    @Column(nullable = false, unique = true)
     @NotBlank
     private String name;
+    private int category;
     @Column
     @NotNull
     @Min(10)
     private int price;
     private int avgPriceInUkraine;
-    private boolean availability;
-    private int category;
+
     @Column
     private String lenseType;
     @Column
@@ -46,18 +46,22 @@ public class Lens {
     private String lenseMaterial;
     @Column(columnDefinition = "TEXT")
     private String description;
-    private int lenseWater;
-    private int sDate;
-    private int sTdt;
-    private int lenseShelfLife;
-    private boolean lenseSleep;
-    private String alensaLink;
 
+    private boolean hasDefaultBC;
     private boolean hasAxis;
     private boolean hasCylinder;
-    private boolean hasDefaultBC;
     private float defaultBC;
     private float defaultDiameter;
+
+    private int lenseWater;
+
+
+    private int sDate;
+    private int sTdt;
+
+    private boolean lenseSleep;
+
+    private boolean availability;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
