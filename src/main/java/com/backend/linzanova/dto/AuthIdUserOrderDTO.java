@@ -14,7 +14,9 @@ public class AuthIdUserOrderDTO {
     private String phone;
     private String firstName;
     private String lastName;
+    private String patronymic;
     private String location;
     private String warehouse;
     private String number;
+    private String postIndex;
 }

@@ -13,4 +13,5 @@ public class ItemDTO {
     private List<DropDTO> drops;
     private List<SpecialDTO> offers;
     private List<LensOrderDTO> lenses;
+    private List<SolutionOrderDTO> solutions;
 }

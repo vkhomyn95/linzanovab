@@ -1,4 +1,5 @@
 package com.backend.linzanova.config;
+import com.backend.linzanova.controller.handlers.CustomResponseEntityExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -14,7 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class
+SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -50,9 +52,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/warehouses").permitAll()
                 .antMatchers("/api/login").anonymous()
                 .antMatchers("/api/drops").permitAll()
+                .antMatchers("/api/lens").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST,"/api/lenses/{\\d+}").hasRole("ADMIN")
                 .antMatchers("/api/users/bool").hasRole("ADMIN")
-                .and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).
-                and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
+                .and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .and().exceptionHandling().authenticationEntryPoint(new CustomResponseEntityExceptionHandler())
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
                 and().addFilterBefore(jwtFIlter, UsernamePasswordAuthenticationFilter.class);
     }
 }

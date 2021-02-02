@@ -3,6 +3,7 @@ package com.backend.linzanova.controller.goods.lens;
 import com.backend.linzanova.dto.LensDto;
 import com.backend.linzanova.dto.LensPageDTO;
 import com.backend.linzanova.entity.lens.Lens;
+import com.backend.linzanova.exeption.NoRightsException;
 import com.backend.linzanova.service.JwtService;
 import com.backend.linzanova.service.lens.ILensService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
+@RequestMapping("/api")
 public class LensController {
 
     private ILensService lensService;
@@ -32,41 +34,46 @@ public class LensController {
         this.lensService = lensService;
     }
 
-    @GetMapping(value = "/api/lenses/count")
+    @GetMapping(value = "/lenses/count")
     public Long getLensesCount() {
+        log.info("Handling GET /lenses/count");
         return lensService.totalCount();
     }
 
-    @GetMapping(value = "/api/lenses")
+    @GetMapping(value = "/lenses")
     public LensPageDTO getAllLenses(@RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = "2") int size) {
+        log.info("Handling GET /lenses");
         final Pageable pageRequest = PageRequest.of(page, size);
         return lensService.getAllLenses(pageRequest);
     }
 
-    @GetMapping(value = "/api/lenses/name")
+    @GetMapping(value = "/lenses/name")
     public LensPageDTO getLensesByName(@RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "2") int size,
                                        @RequestParam String name) {
+        log.info("Handling GET /lenses/name");
         final Pageable pageRequest = PageRequest.of(page, size);
         return lensService.getLensesByName(pageRequest, name);
     }
 
-    @GetMapping(value = "/api/lenses/filter")
+    @GetMapping(value = "/lenses/filter")
     public LensPageDTO getLensFilterOption(@RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "2") int size,
                                           @RequestParam String colName,
                                           @RequestParam String name) {
+        log.info("Handling GET /lenses/filter");
         final Pageable pageRequest = PageRequest.of(page, size);
         return lensService.getLensFilter(pageRequest, colName, name);
     }
 
-    @GetMapping(value = "/api/lenses/{lensId}")
+    @GetMapping(value = "/lenses/{lensId}")
     public Lens getLens(@PathVariable int lensId) {
+        log.info("Handling GET /lenses/" + lensId);
         return lensService.getLens(lensId);
     }
 
-    @PostMapping(value = "/api/lens")
+    @PostMapping(value = "/lens")
     @ResponseStatus(HttpStatus.CREATED)
     public LensDto saveLens(@RequestHeader(value = "Authorization") String auth,
                             @RequestBody @Valid Lens lens) {
@@ -76,15 +83,15 @@ public class LensController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUser);
         if (userDetails != null && userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
-
             lens.setCategory(1);
             return lensService.insertLens(lens, userDetails.getUsername());
         }else{
-            throw new RuntimeException("No rights");
+            throw new NoRightsException("No rights for user: " + jwtUser);
         }
     }
 
-    @PostMapping(value = "/api/lenses/{lensId}")
+    @PostMapping(value = "/lenses/{lensId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public Lens updateLens(@RequestHeader(value = "Authorization") String auth,
                            @RequestBody Lens lens,
                            @PathVariable int lensId) {
@@ -97,7 +104,7 @@ public class LensController {
             lens.setId(lensId);
             return lensService.updateLens(lens, userDetails.getUsername());
         }else{
-            throw new RuntimeException("No rights");
+            throw new NoRightsException("No rights for user: " + jwtUser);
         }
     }
 }

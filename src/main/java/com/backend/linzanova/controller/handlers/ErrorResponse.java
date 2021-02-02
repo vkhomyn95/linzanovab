@@ -1,4 +1,4 @@
-package com.backend.linzanova.controller.goods.lens;
+package com.backend.linzanova.controller.handlers;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

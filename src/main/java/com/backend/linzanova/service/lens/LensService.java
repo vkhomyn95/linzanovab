@@ -5,6 +5,7 @@ import com.backend.linzanova.dto.LensDto;
 import com.backend.linzanova.dto.LensPageDTO;
 import com.backend.linzanova.entity.lens.Lens;
 import com.backend.linzanova.entity.user.User;
+import com.backend.linzanova.exeption.DoesNotExistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +46,7 @@ public class LensService implements ILensService {
 
     @Override
     public Lens getLens(int id) {
-        return lensDao.findById(id).orElseThrow(() -> new RuntimeException("Does not exist lens with id: " + id));
+        return lensDao.findById(id).orElseThrow(() -> new DoesNotExistException("Товару у категорії лінзи з id: " + id + " не існує"));
     }
 
     @Override
@@ -75,6 +76,7 @@ public class LensService implements ILensService {
     @Override
     public LensPageDTO getLensFilter(Pageable pageable, String colName, String nameValue) {
         final Page<Lens> byFIlter = lensDao.findAll(byColumnNameAndValue(colName, nameValue), pageable);
+
         return new LensPageDTO(byFIlter.getContent(), byFIlter.getTotalElements(), byFIlter.getSize(), byFIlter.isEmpty(), byFIlter.getTotalPages());
     }
 }

@@ -1,6 +1,7 @@
 package com.backend.linzanova.service.orders;
 
 import com.backend.linzanova.dto.OrderItemsDTO;
+import com.backend.linzanova.dto.OrderItemsToUpdateDTO;
 import com.backend.linzanova.dto.OrderPageDTO;
 import com.backend.linzanova.dto.RequestDTO;
 import com.backend.linzanova.entity.order.Orders;
@@ -17,7 +18,7 @@ public interface IOrderService {
 
     OrderPageDTO getAllOrdersByUserEmail(Pageable pageable, String email);
 
-    Orders updateOrder(int id, OrderItemsDTO items);
+    Orders updateOrder(int id, OrderItemsToUpdateDTO items);
 
     Orders updateOrderTrackingField(int orderNumber, String field);
 

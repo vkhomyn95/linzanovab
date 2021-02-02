@@ -26,23 +26,15 @@ public class Lens {
     @NotBlank
     private String name;
     private int category;
-    @Column
     @NotNull
     @Min(10)
     private int price;
     private int avgPriceInUkraine;
-
-    @Column
     private String lenseType;
-    @Column
     private String lenseProducer;
-    @Column
     private String lenseBrand;
-    @Column
     private int quantity;
-    @Column
     private String lenseCorrection;
-    @Column
     private String lenseMaterial;
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -52,9 +44,7 @@ public class Lens {
     private boolean hasCylinder;
     private float defaultBC;
     private float defaultDiameter;
-
     private int lenseWater;
-
 
     private int sDate;
     private int sTdt;

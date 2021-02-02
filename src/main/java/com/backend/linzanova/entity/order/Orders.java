@@ -2,11 +2,13 @@ package com.backend.linzanova.entity.order;
 
 //import com.backend.linzanova.entity.order.Item;
 import com.backend.linzanova.entity.user.User;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -25,7 +27,8 @@ public class Orders {
     private int priceToPayAfterDelivery;
     private int priceToPayNow;
 
-    private String createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
 
     private String lastName;
     private String firstName;

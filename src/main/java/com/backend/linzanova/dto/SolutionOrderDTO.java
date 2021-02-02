@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class SpecialDTO {
-    private int offerId;
+public class SolutionOrderDTO {
+    private int solutionId;
     private String properties;
 }

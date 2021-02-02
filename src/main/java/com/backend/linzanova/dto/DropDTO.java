@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class DropDTO {
     private int dropId;
+    private String properties;
 }

@@ -1,6 +1,7 @@
 package com.backend.linzanova.entity.order;
 import com.backend.linzanova.entity.drops.Drops;
 import com.backend.linzanova.entity.lens.Lens;
+import com.backend.linzanova.entity.solution.Solution;
 import com.backend.linzanova.entity.special.Special;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,11 @@ public class Item {
     @JoinColumn(referencedColumnName = "special_id")
     @ManyToMany(fetch = FetchType.LAZY)
     public List<Special> offers;
+
+    @JoinColumn(referencedColumnName = "solution_id")
+    @ManyToMany(fetch = FetchType.LAZY)
+    public List<Solution> solutions;
+
 
 
 

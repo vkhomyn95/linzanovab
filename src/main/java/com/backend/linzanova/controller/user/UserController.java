@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +38,8 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private UserDetailsService userDetailsService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     @GetMapping(value = "/count")
@@ -69,7 +72,7 @@ public class UserController {
             String jwtToken = auth.substring(7);
             String user = jwtService.extractUsername(jwtToken);
             User byEmail = userService.findByEmail(user);
-            return new AuthIdUserOrderDTO(byEmail.getId(), byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber());
+            return new AuthIdUserOrderDTO(byEmail.getId(), byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getPatronymic(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber(), byEmail.getPostIndex());
         }else {
             return null;
         }
@@ -119,10 +122,30 @@ public class UserController {
                 byEmail.setPhone(user.getPhone());
                 byEmail.setWarehouse(user.getWarehouse());
                 byEmail.setLocation(user.getLocation());
+                byEmail.setPostIndex(user.getPostIndex());
+                byEmail.setPatronymic(user.getPatronymic());
                 userService.updateUser(byEmail);
-                return new UserOrderDTO(byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber());
+                return new UserOrderDTO(byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getPatronymic(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber(), byEmail.getPostIndex());
             }else {
                 throw  new RuntimeException("Access denied");
+            }
+        }else {
+            throw new RuntimeException("Please, auth first");
+        }
+    }
+    @PostMapping(value = "/password")
+    public UserOrderDTO updateCurrentUser(@RequestHeader(value = "Authorization") String auth,
+                                          @RequestBody UserPasswordRenewDTO passwordData) {
+        if (auth != null) {
+            String jwtToken = auth.substring(7);
+            String jwtUser = jwtService.extractUsername(jwtToken);
+            User byEmail = userService.findByEmail(jwtUser);
+            if (byEmail.getRole().equals("ROLE_USER") && passwordEncoder.matches(passwordData.getOldPassword(), byEmail.getPassword())) {
+                byEmail.setPassword(passwordData.getNewPassword());
+                userService.updateUser(byEmail);
+                return new UserOrderDTO(byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getPatronymic(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber(), byEmail.getPostIndex());
+            }else {
+                throw  new RuntimeException("Access denied or password not equals");
             }
         }else {
             throw new RuntimeException("Please, auth first");

@@ -40,9 +40,13 @@ public class User implements UserDetails {
     @NotBlank
     private String lastName;
     @Column(nullable = false)
+    @NotBlank
+    private String patronymic;
+    @Column(nullable = false)
     private String password;
     private String location;
     private String number;
+    private String postIndex;
     private String warehouse;
 
     private int shoppingQuantity;

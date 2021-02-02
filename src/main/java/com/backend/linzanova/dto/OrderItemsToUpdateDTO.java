@@ -1,24 +1,19 @@
 package com.backend.linzanova.dto;
 
 import com.backend.linzanova.entity.order.Delivery;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @AllArgsConstructor
 @Getter
-public class OrderItemsDTO {
+public class OrderItemsToUpdateDTO {
     private int id;
     private int totalSumm;
     private int priceToPayAfterDelivery;
     private int priceToPayNow;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     private String lastName;
     private String firstName;
@@ -39,6 +34,4 @@ public class OrderItemsDTO {
 
     private String userEmail;
     private int userId;
-
-
 }

@@ -1,6 +1,7 @@
 package com.backend.linzanova.controller.order;
 
 import com.backend.linzanova.dto.OrderItemsDTO;
+import com.backend.linzanova.dto.OrderItemsToUpdateDTO;
 import com.backend.linzanova.dto.OrderPageDTO;
 import com.backend.linzanova.dto.RequestDTO;
 import com.backend.linzanova.entity.order.Orders;
@@ -56,7 +57,7 @@ public class OrderController {
     }
     @PostMapping("/{orderId}")
     public Orders updateOrder(@RequestHeader(value = "Authorization") String auth,
-                              @RequestBody OrderItemsDTO requestDTO,
+                              @RequestBody OrderItemsToUpdateDTO requestDTO,
                               @PathVariable int orderId) {
         String jwtToken = auth.substring(7);
         String jwtUser = jwtService.extractUsername(jwtToken);
