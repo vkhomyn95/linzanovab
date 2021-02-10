@@ -12,7 +12,9 @@ public interface IUserService {
 
     UserPageDTO getAllUsers(Pageable pageable);
 
-    User getUser(int id);
+    User getUser(int id, String username);
+
+    User getUserById(int id);
 
     User updateUser(User user);
 

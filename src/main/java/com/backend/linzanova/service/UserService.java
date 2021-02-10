@@ -1,10 +1,13 @@
 package com.backend.linzanova.service;
 
 import com.backend.linzanova.dao.IUserDao;
+import com.backend.linzanova.dto.OrderItemsDTO;
 import com.backend.linzanova.dto.UserOrderDTO;
 import com.backend.linzanova.dto.UserPageDTO;
 import com.backend.linzanova.dto.UserPasswordRenewDTO;
 import com.backend.linzanova.entity.user.User;
+import com.backend.linzanova.exeption.DoesNotExistException;
+import com.backend.linzanova.exeption.NoRightsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +26,9 @@ public class UserService implements UserDetailsService, IUserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
 
     @Override
@@ -47,8 +53,15 @@ public class UserService implements UserDetailsService, IUserService {
     }
 
     @Override
-    public User getUser(int id) {
-        return userDao.findById(id).orElseThrow(() -> new RuntimeException("No user with id: " + id));
+    public User getUser(int id, String username) {
+        User user = userDao.findById(id).orElseThrow(() -> new DoesNotExistException("Користувача із id: " + id + "не знайдено"));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (user.getUsername().equals(username) || userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
+            return user;
+        }else {
+            throw new NoRightsException("No rights for user: " + username);
+        }
     }
 
     @Override
@@ -71,5 +84,10 @@ public class UserService implements UserDetailsService, IUserService {
     @Override
     public User findByEmail(String email) {
         return userDao.findByEmail(email);
+    }
+
+    @Override
+    public User getUserById(int id) {
+        return userDao.findById(id).orElseThrow(() -> new DoesNotExistException("Користувача із id: " + id + "не знайдено"));
     }
 }

@@ -7,9 +7,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,6 +29,7 @@ public class Special {
     @NotBlank
     private String name;
     private int category;
+    @NotNull
     private int price;
     private int avgPriceInUkraine;
 
@@ -42,8 +47,12 @@ public class Special {
 
     private boolean activeStatus;
 
+    @ElementCollection
+    @Fetch(FetchMode.SUBSELECT)
+    private List<String> photo;
+
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
 }

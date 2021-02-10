@@ -2,8 +2,11 @@ package com.backend.linzanova.controller.goods.lens;
 
 import com.backend.linzanova.dto.LensDto;
 import com.backend.linzanova.dto.LensPageDTO;
+import com.backend.linzanova.dto.PhotoResponseDTO;
 import com.backend.linzanova.entity.lens.Lens;
+import com.backend.linzanova.exeption.AlreadyExistsException;
 import com.backend.linzanova.exeption.NoRightsException;
+import com.backend.linzanova.exeption.NoSuchFileException;
 import com.backend.linzanova.service.JwtService;
 import com.backend.linzanova.service.lens.ILensService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.io.IOException;
 
 @RestController
 @Slf4j
@@ -84,7 +90,8 @@ public class LensController {
         if (userDetails != null && userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
             lens.setCategory(1);
-            return lensService.insertLens(lens, userDetails.getUsername());
+            lensService.insertLens(lens, userDetails.getUsername());
+            return new LensDto(lens.getId(), lens.getName(), lens.getPrice(), lens.getUser().getFirstName());
         }else{
             throw new NoRightsException("No rights for user: " + jwtUser);
         }
@@ -95,6 +102,7 @@ public class LensController {
     public Lens updateLens(@RequestHeader(value = "Authorization") String auth,
                            @RequestBody Lens lens,
                            @PathVariable int lensId) {
+        log.info("Handling POST /lenses/update with object " + lens);
         String jwtToken = auth.substring(7);
         String jwtUser = jwtService.extractUsername(jwtToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUser);
@@ -105,6 +113,30 @@ public class LensController {
             return lensService.updateLens(lens, userDetails.getUsername());
         }else{
             throw new NoRightsException("No rights for user: " + jwtUser);
+        }
+    }
+
+    @PostMapping(value = "/lenses/{lensId}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public PhotoResponseDTO uploadLensPhoto(@PathVariable int lensId, MultipartFile file) throws AlreadyExistsException {
+        log.info("Handling POST /lenses/{lensId}/photo");
+        return lensService.insertPhoto(lensId, file);
+    }
+
+    @GetMapping(value = "/lenses/image")
+    public ResponseEntity<byte[]> getLensImage(@RequestParam String name,
+                                               @RequestHeader(value = "format") String format) throws IOException, NoSuchFileException {
+        log.info("Handling GET /lens/image/" + name);
+        if (format.equals("jpeg")){
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(lensService.getLensImage(name, format));
+        }else {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.valueOf("image/webp"))
+                    .body(lensService.getLensImage(name, format));
         }
     }
 }

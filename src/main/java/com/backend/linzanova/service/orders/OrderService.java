@@ -13,10 +13,14 @@ import com.backend.linzanova.entity.order.Orders;
 import com.backend.linzanova.entity.solution.Solution;
 import com.backend.linzanova.entity.special.Special;
 import com.backend.linzanova.entity.user.User;
+import com.backend.linzanova.exeption.DoesNotExistException;
+import com.backend.linzanova.exeption.NoRightsException;
 import com.backend.linzanova.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedInputStream;
@@ -51,6 +55,9 @@ public class OrderService implements IOrderService {
     private SolutionDao solutionDao;
 
     @Autowired DeliveryService deliveryService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     public Orders insertOrder(Orders orders, RequestDTO items) {
@@ -122,7 +129,7 @@ public class OrderService implements IOrderService {
 
         it.add(new Item(orders.getId(), lensesList, dropsList, specialList, solutionList));
 
-        final User user = userService.getUser(items.getUser());
+        final User user = userService.getUserById(items.getUser());
         deliveryService.insertDelivery(items.getDelivery());
         orders.setItems(it);
         orders.setCreatedAt(LocalDateTime.now());
@@ -225,12 +232,18 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public OrderItemsDTO getOneOrderById(int id) {
-        Orders one = ordersDao.getOne(id);
-        return new OrderItemsDTO(one.getId(), one.getTotalSumm(), one.getPriceToPayAfterDelivery(), one.getPriceToPayNow(),
-                one.getCreatedAt(), one.getLastName(), one.getFirstName(), one.getEmail(), one.getPatronymic(), one.getPhone(),
-                one.getCustomerComment(), one.getDelivery(), one.getProperties(), one.getMeestTrackingId(), one.getNovaPoshtaTTN(),
-                one.isDelivered(), one.isCanceled(), one.getUser().getEmail(), one.getUser().getId());
+    public OrderItemsDTO getOneOrderById(int id, String username) {
+        Orders one = ordersDao.findById(id).orElseThrow(() -> new DoesNotExistException("Замовлення з номером: " + id + " не існує"));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (one.getUser().getUsername().equals(username) || userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
+            return new OrderItemsDTO(one.getId(), one.getTotalSumm(), one.getPriceToPayAfterDelivery(), one.getPriceToPayNow(),
+                    one.getCreatedAt(), one.getLastName(), one.getFirstName(), one.getEmail(), one.getPatronymic(), one.getPhone(),
+                    one.getCustomerComment(), one.getDelivery(), one.getProperties(), one.getMeestTrackingId(), one.getNovaPoshtaTTN(),
+                    one.isDelivered(), one.isCanceled(), one.getUser().getEmail(), one.getUser().getId());
+        }else {
+            throw new NoRightsException("No rights for user: " + username);
+        }
     }
 
     @Override

@@ -3,17 +3,17 @@ package com.backend.linzanova.controller.user;
 import com.backend.linzanova.dao.IUserDao;
 import com.backend.linzanova.dto.*;
 import com.backend.linzanova.entity.user.User;
-import com.backend.linzanova.exeption.TokenExpiredExeption;
+import com.backend.linzanova.exeption.NoRightsException;
 import com.backend.linzanova.service.IUserService;
 import com.backend.linzanova.service.JwtService;
 import io.jsonwebtoken.impl.DefaultClaims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -44,30 +45,46 @@ public class UserController {
 
     @GetMapping(value = "/count")
     public Long getUsersCount() {
+        log.info("Handling GET /users/count");
         return userService.totalCount();
     }
 
+    //only admin
     @GetMapping
     public UserPageDTO getUsers(@RequestParam int page,
                                 @RequestParam int size) {
+        log.info("Handling GET /users");
         final Pageable pageable = PageRequest.of(page, size);
         return userService.getAllUsers(pageable);
     }
+
+    //only admin
     @GetMapping(value = "/name")
     public UserPageDTO getUsersByName(@RequestParam int page,
                                       @RequestParam int size,
                                       @RequestParam String name) {
+        log.info("Handling GET /users/name where name: " + name);
         final Pageable pageable = PageRequest.of(page, size);
         return userService.getAllUsersByName(pageable, name);
     }
 
+    //only admin or current user id
     @GetMapping(value = "/{id}")
-    public User getUser(@PathVariable int id){
-        return userService.getUser(id);
+    public User getUser(@PathVariable int id,
+                        @RequestHeader(value = "Authorization") String auth){
+        log.info("Handling GET /users/" + id);
+        String jwtToken = auth.substring(7);
+        String user = jwtService.extractUsername(jwtToken);
+        if (user != null){
+            return userService.getUser(id, user);
+        }else {
+            throw new NoRightsException("No rights for user: " + user);
+        }
     }
 
     @GetMapping(value = "/auth")
     public AuthIdUserOrderDTO getAuthUser(@RequestHeader(value = "Authorization", required = false) String auth) {
+        log.info("Handling GET /users/auth");
         if (auth != null) {
             String jwtToken = auth.substring(7);
             String user = jwtService.extractUsername(jwtToken);
@@ -80,6 +97,7 @@ public class UserController {
 
     @GetMapping(value = "/stats")
     public UserCabinetStatsDTO getAuthUserStats(@RequestHeader(value = "Authorization", required = false) String auth) {
+        log.info("Handling GET /users/stats");
         if (auth != null) {
             String jwtToken = auth.substring(7);
             String user = jwtService.extractUsername(jwtToken);
@@ -91,9 +109,11 @@ public class UserController {
     }
 
     @PostMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
     public User updateUser(@RequestHeader(value = "Authorization") String auth,
                            @PathVariable int id,
                            @RequestBody User user) {
+        log.info("Handling update POST /users/" + id);
         String jwtToken = auth.substring(7);
         String jwtUser = jwtService.extractUsername(jwtToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUser);
@@ -103,13 +123,15 @@ public class UserController {
             user.setId(id);
             return userService.updateUser(user);
         }else{
-            throw new RuntimeException("No rights");
+            throw new NoRightsException("No rights for user: " + user);
         }
     }
 
     @PostMapping(value = "/update")
+    @ResponseStatus(HttpStatus.CREATED)
     public UserOrderDTO updateCurrentUser(@RequestHeader(value = "Authorization") String auth,
                                           @RequestBody UserOrderDTO user) {
+        log.info("Handling POST /users/update | current user");
         if (auth != null) {
             String jwtToken = auth.substring(7);
             String jwtUser = jwtService.extractUsername(jwtToken);
@@ -127,15 +149,17 @@ public class UserController {
                 userService.updateUser(byEmail);
                 return new UserOrderDTO(byEmail.getEmail(), byEmail.getPhone(), byEmail.getFirstName(), byEmail.getLastName(), byEmail.getPatronymic(), byEmail.getLocation(), byEmail.getWarehouse(), byEmail.getNumber(), byEmail.getPostIndex());
             }else {
-                throw  new RuntimeException("Access denied");
+                throw  new NoRightsException("No rights for user: " + user);
             }
         }else {
-            throw new RuntimeException("Please, auth first");
+            throw new NoRightsException("No rights for user: " + user);
         }
     }
     @PostMapping(value = "/password")
+    @ResponseStatus(HttpStatus.CREATED)
     public UserOrderDTO updateCurrentUser(@RequestHeader(value = "Authorization") String auth,
                                           @RequestBody UserPasswordRenewDTO passwordData) {
+        log.info("Handling POST /users/password | current user password " + passwordData );
         if (auth != null) {
             String jwtToken = auth.substring(7);
             String jwtUser = jwtService.extractUsername(jwtToken);
@@ -153,7 +177,9 @@ public class UserController {
     }
 
     @PostMapping(value = "/register")
+    @ResponseStatus(HttpStatus.CREATED)
     public User registerUser(@RequestBody @Valid User user) {
+        log.info("Handling POST /users/register " + user);
         user.setRole("ROLE_USER");
         userService.insertUser(user);
         return user;
@@ -161,6 +187,7 @@ public class UserController {
 
     @PostMapping(value = "/login")
     public AuthenticationResponse generateJWT(@RequestBody AuthRequest authRequest) {
+        log.info("Handling POST /users/login");
         authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         return new AuthenticationResponse(jwtService.generateToken(authRequest.getUsername()));
@@ -169,6 +196,7 @@ public class UserController {
 
     @GetMapping(value = "/bool")
     public AdminDTO isAdminUser(@RequestHeader(value = "Authorization", required = false) String auth){
+        log.info("Handling POST /users/bool");
         if (auth == null){
             return new AdminDTO(false);
         }else {
@@ -187,6 +215,7 @@ public class UserController {
 
     @GetMapping(value = "/refreshtoken")
     public AuthenticationResponse refreshToken(HttpServletRequest request) throws  Exception {
+        log.info("Handling POST /users/refreshtoken");
         DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("claims");
 
         Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);

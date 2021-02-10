@@ -14,7 +14,7 @@ public interface IOrderService {
 
     OrderPageDTO getAllOrders(Pageable pageable);
 
-    OrderItemsDTO getOneOrderById(int id);
+    OrderItemsDTO getOneOrderById(int id, String username);
 
     OrderPageDTO getAllOrdersByUserEmail(Pageable pageable, String email);
 
