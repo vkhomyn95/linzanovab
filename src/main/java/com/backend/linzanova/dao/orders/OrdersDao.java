@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.persistence.NamedEntityGraph;
+
 public interface OrdersDao extends JpaRepository<Orders, Integer> {
     @Query("select count(o) from Orders o")
     Long CountOrders();

@@ -44,7 +44,8 @@ public class DropsController {
     }
 
     @GetMapping
-    public DropPageDTO getAllDrops(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "2") int size) {
+    public DropPageDTO getAllDrops(@RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "2") int size) {
         log.info("Handling GET /drops");
         PageRequest pageRequest = PageRequest.of(page, size);
         return dropsService.getAllDrops(pageRequest);

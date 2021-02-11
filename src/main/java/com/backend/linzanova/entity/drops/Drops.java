@@ -12,12 +12,20 @@ import org.hibernate.annotations.FetchMode;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
+@NamedEntityGraphs({
+        @NamedEntityGraph(name="Drops.allJoins", includeAllAttributes = true),
+        @NamedEntityGraph(name="Drops.noJoins", attributeNodes = {
+                @NamedAttributeNode("comments")
+        })
+})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Drops {
 
@@ -44,6 +52,11 @@ public class Drops {
     @ElementCollection
     @Fetch(FetchMode.SUBSELECT)
     private List<String> photo;
+
+    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(fetch = FetchType.LAZY,
+            mappedBy = "drops")
+    private List<DropsComments> comments;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

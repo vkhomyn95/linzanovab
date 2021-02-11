@@ -30,5 +30,4 @@ public class Delivery {
     private String warehouseNumber;
     private String description;
     private int postIndex;
-
 }
